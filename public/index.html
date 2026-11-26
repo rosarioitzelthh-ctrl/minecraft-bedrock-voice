@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Minecraft Bedrock — Chat de Voz por Proximidad</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <div class="app-shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-icon">🎙️</div>
+        <div>
+          <h1>Minecraft Bedrock Proximity Voice</h1>
+          <p class="subtitle">Chat de voz 3D por proximidad en tiempo real</p>
+        </div>
+      </div>
+
+      <div class="topbar-actions">
+        <span id="mcBadge" class="badge badge-warn">Minecraft: Esperando /connect</span>
+        <span id="micBadge" class="badge badge-off">Micrófono: Sin permiso</span>
+        <a
+          href="/download/MinecraftProximityVoice.mcaddon"
+          download="MinecraftProximityVoice.mcaddon"
+          class="btn btn-download"
+          title="Descarga el mod e ábrelo para importarlo en Minecraft Bedrock"
+        >
+          📦 Descargar Mod (.mcaddon)
+        </a>
+      </div>
+    </header>
+
+    <main class="main-grid">
+      <!-- Panel izquierdo: Conexión, Controles y Jugadores -->
+      <section class="panel left-panel">
+        <div id="joinCard" class="card">
+          <h2>1. Entra con tu Nombre</h2>
+          <p class="hint">
+            Solo escribe tu <strong>Gamertag exacto</strong> de Minecraft y toca entrar. Se pedirá permiso de micrófono automáticamente.
+          </p>
+          <label class="field">
+            <span>Gamertag de Minecraft</span>
+            <input id="gamertagInput" type="text" placeholder="Ej: Steve" maxlength="24" autocomplete="nickname" />
+          </label>
+
+          <div class="btn-row">
+            <button id="btnJoin" class="btn btn-primary" style="width: 100%; padding: 12px; font-size: 1rem;">
+              🎙️ Entrar al Chat de Voz
+            </button>
+          </div>
+          <p id="joinError" class="error-text"></p>
+        </div>
+
+        <div id="controlsCard" class="card hidden">
+          <div class="card-header">
+            <h2>Controles de Voz</h2>
+            <button id="btnLeave" class="btn btn-danger btn-sm">Salir</button>
+          </div>
+
+          <div class="btn-row">
+            <button id="btnMute" class="btn btn-secondary">🎙️ Mic: Activo</button>
+            <button id="btnDeafen" class="btn btn-secondary">🔊 Audio: Activo</button>
+          </div>
+
+          <div class="meter-wrap">
+            <span>Nivel de tu micrófono</span>
+            <div class="meter-bar">
+              <div id="micLevelFill" class="meter-fill"></div>
+            </div>
+          </div>
+
+          <label class="field">
+            <span>Distancia máxima de voz: <strong id="maxDistLabel">32</strong> bloques</span>
+            <input id="maxDistSlider" type="range" min="10" max="80" value="32" />
+          </label>
+        </div>
+
+        <div class="card">
+          <h2>2. Conectar Mundo y Amigos (Online)</h2>
+          <ol class="steps-list">
+            <li><strong>Tú (Anfitrión):</strong> Abre el mundo con el mod <code>.mcaddon</code> y ejecuta en el chat:<br />
+              <code class="cmd-copy" id="cmdCopy" title="Clic para copiar">/connect localhost:3001</code>
+            </li>
+            <li><strong>Tus amigos (de otro lado):</strong> Solo abren este link en su navegador o celular (no necesitan instalar nada):<br />
+              <code class="cmd-copy" id="shareUrlBox" title="Clic para copiar">Cargando link...</code>
+            </li>
+            <li>Opcional: en Minecraft escribe <code>!voz link https://tu-link</code> para que a tus amigos les salga el link automático al entrar al mundo.</li>
+          </ol>
+        </div>
+
+        <div class="card">
+          <h2>Jugadores Conectados (<span id="peerCount">0</span>)</h2>
+          <ul id="playersList" class="players-list">
+            <li class="empty-msg">Aún no hay jugadores en la sala de voz.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Panel derecho: Radar 2D de Proximidad -->
+      <section class="panel right-panel">
+        <div class="card radar-card">
+          <div class="card-header">
+            <h2>Radar de Proximidad 3D</h2>
+            <span id="posReadout" class="mono">Pos: (0, 64, 0)</span>
+          </div>
+          <p class="hint" id="radarHint">
+            Si Minecraft aún no está conectado, puedes <strong>arrastrar tu punto</strong> en el radar para probar el audio 3D de distancia y dirección.
+          </p>
+          <div class="canvas-wrap">
+            <canvas id="radarCanvas" width="560" height="560"></canvas>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <div id="audioContainer" class="hidden"></div>
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,12 @@
+{
+  "name": "minecraft-bedrock-proximity-voice",
+  "version": "1.0.0",
+  "description": "Chat de voz 3D por proximidad para Minecraft Bedrock (PC y Teléfono)",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
