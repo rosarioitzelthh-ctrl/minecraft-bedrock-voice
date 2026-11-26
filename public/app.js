@@ -116,17 +116,40 @@ async function requestMicrophone() {
   }
 }
 
-function setupLocalMicMeter() {
+function ensureAudioContext() {
   if (!audioCtx) {
     audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    // Mantiene el AudioContext activo en segundo plano en móviles
+    try {
+      const osc = audioCtx.createOscillator();
+      const silentGain = audioCtx.createGain();
+      silentGain.gain.value = 0.0001;
+      osc.connect(silentGain);
+      silentGain.connect(audioCtx.destination);
+      osc.start();
+    } catch (_) {}
   }
   if (audioCtx.state === "suspended") {
-    audioCtx.resume();
+    audioCtx.resume().catch(() => {});
   }
+}
+
+function setupLocalMicMeter() {
+  ensureAudioContext();
   const src = audioCtx.createMediaStreamSource(localStream);
   analyser = audioCtx.createAnalyser();
   analyser.fftSize = 256;
   src.connect(analyser);
+
+  if ("mediaSession" in navigator) {
+    try {
+      navigator.mediaSession.metadata = new MediaMetadata({
+        title: "Chat de Voz Minecraft",
+        artist: myGamertag || "En llamada de proximidad",
+      });
+      navigator.mediaSession.playbackState = "playing";
+    } catch (_) {}
+  }
 
   const data = new Uint8Array(analyser.frequencyBinCount);
   let lastSpeaking = false;
@@ -160,6 +183,9 @@ btnJoin.addEventListener("click", async () => {
     localStorage.setItem("mc_voice_gamertag", tag);
   } catch (_) {}
 
+  // Iniciar AudioContext dentro del gesto del usuario (clave en móviles/iOS/Android)
+  ensureAudioContext();
+
   btnJoin.disabled = true;
   btnJoin.textContent = "Conectando micrófono...";
   if (!localStream) {
@@ -170,12 +196,7 @@ btnJoin.addEventListener("click", async () => {
       return;
     }
   }
-  if (!audioCtx) {
-    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
-  }
-  if (audioCtx.state === "suspended") {
-    await audioCtx.resume();
-  }
+  ensureAudioContext();
   try {
     await navigator.wakeLock?.request("screen");
   } catch (_) {}
@@ -184,6 +205,12 @@ btnJoin.addEventListener("click", async () => {
   connectWebSocket();
   btnJoin.disabled = false;
   btnJoin.textContent = "🎙️ Entrar al Chat de Voz";
+});
+
+document.addEventListener("visibilitychange", () => {
+  if (document.visibilityState === "visible" && audioCtx && audioCtx.state === "suspended") {
+    audioCtx.resume().catch(() => {});
+  }
 });
 
 btnLeave.addEventListener("click", () => {
